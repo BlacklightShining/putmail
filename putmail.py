@@ -473,12 +473,12 @@ try:
         server = smtplib.SMTP()
     #server.set_debuglevel(True)
     check_status(*server.connect(theSMTPServer, thePort))
-    check_status(*server.ehlo())
+    check_status(*server.ehlo('0.0.0.0'))
     if theTLSMode == TLS_MODE_STARTTLS:
         check_status(*server.starttls(context=theTLSContext))
         # SMTP.starttls() discards all knowledge obtained from the server
         # as per RFC 3207. This means we need to EHLO again.
-        check_status(*server.ehlo())
+        check_status(*server.ehlo('0.0.0.0'))
     if theAuthenticateFlag:
         check_status(*server.login(theSMTPLogin, theSMTPPassword))
     rejectedRecipients = server.sendmail(theEMailAddress, theRecipients,
