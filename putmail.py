@@ -14,7 +14,7 @@
 __version_info__ = (1, 4, 1)
 __version__ = '.'.join([str(i) for i in __version_info__])
 
-import ConfigParser
+import configparser
 import smtplib
 import email
 import os
@@ -314,9 +314,9 @@ except email.Errors.MessageError:
 
 configPath = os.path.join(os.environ[HOME_EV], CONFIG_DIRECTORY) # temporally
 theConfigFilename = CONFIG_NAME
-if theMessage.has_key(FROM_HEADER):
+if FROM_HEADER in theMessage:
     try:
-        fromaddr = email.Utils.getaddresses(
+        fromaddr = email.utils.getaddresses(
             theMessage.get_all(FROM_HEADER))[-1][1]
         tmpcfgpath = os.path.join(configPath, fromaddr)
         if os.path.isfile(tmpcfgpath):
@@ -352,7 +352,7 @@ if not os.access(configPath, os.R_OK):
 
 ### Read the file ###
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 try:
     config.read([configPath])
 except OSError:
@@ -417,7 +417,7 @@ if config.has_option(CONFIG_SECTION, OPTION_LOGIN): # Login/password
         theSMTPPassword = keychain_func(theSMTPServer)
     except TypeError:
         exit_forcing_print(ERROR_CONFIG_KEYCHAIN)
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         theSMTPPassword = config.get(CONFIG_SECTION, OPTION_PASSWORD)
     theAuthenticateFlag = True
 
@@ -438,24 +438,24 @@ except ValueError:
 
 # If we are told to take the addresses from the message itself...
 if theRcpsFromMailFlag:
-    if theMessage.has_key(TO_HEADER):
+    if TO_HEADER in theMessage:
         theRecipients.extend(
-            [x[1] for x in email.Utils.getaddresses(
+            [x[1] for x in email.utils.getaddresses(
                 theMessage.get_all(TO_HEADER))]
         )
-    if theMessage.has_key(CC_HEADER):
+    if CC_HEADER in theMessage:
         theRecipients.extend(
-            [x[1] for x in email.Utils.getaddresses(
+            [x[1] for x in email.utils.getaddresses(
                 theMessage.get_all(CC_HEADER))]
         )
-    if theMessage.has_key(BCC_HEADER):
+    if BCC_HEADER in theMessage:
         theRecipients.extend(
-            [x[1] for x in email.Utils.getaddresses(
+            [x[1] for x in email.utils.getaddresses(
                 theMessage.get_all(BCC_HEADER))]
         )
 
 # Delete Bcc header if it exists
-if theMessage.has_key(BCC_HEADER):
+if BCC_HEADER in theMessage:
     del theMessage[BCC_HEADER]
 
 # Still no addresses found?
@@ -504,7 +504,7 @@ except socket.timeout as err:
 except smtplib.SMTPException:
     exit_conditional_print(ERROR_UNKNOWN)
 except (socket.herror, socket.gaierror, OSError) as err:
-    exit_conditional_print(ERROR_NETWORK % (theSMTPServer, err[1]))
+    exit_conditional_print(ERROR_NETWORK % (theSMTPServer, str(err)))
 
 try:
     server.quit()
@@ -514,4 +514,4 @@ except smtplib.SMTPException:
 # Check for rejected recipients
 if rejectedRecipients:
     conditional_print(WARNING_REJECTED)
-    conditional_print('\n'.join(['\t' + email for email in rejectedRecipients]))
+    conditional_print('\n'.join(['\t' + recipient for recipient in rejectedRecipients]))
