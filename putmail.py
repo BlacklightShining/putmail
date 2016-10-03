@@ -468,11 +468,11 @@ if not theRecipients:
 
 try:
     if theTLSMode == TLS_MODE_NATIVE:
-        server = smtplib.SMTP_SSL(context=theTLSContext)
+        server = smtplib.SMTP_SSL(theSMTPServer, thePort,
+                                  context=theTLSContext)
     else:
-        server = smtplib.SMTP()
+        server = smtplib.SMTP(theSMTPServer, thePort)
     #server.set_debuglevel(True)
-    check_status(*server.connect(theSMTPServer, thePort))
     check_status(*server.ehlo('0.0.0.0'))
     if theTLSMode == TLS_MODE_STARTTLS:
         check_status(*server.starttls(context=theTLSContext))
